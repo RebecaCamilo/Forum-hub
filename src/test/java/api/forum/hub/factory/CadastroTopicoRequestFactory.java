@@ -15,4 +15,13 @@ public class CadastroTopicoRequestFactory {
                 "Curso do topico"
         );
     }
+
+    public static CadastroTopicoRequest criaCadastroTopicoRequestInvalido() {
+        return new CadastroTopicoRequest(
+                "",
+                "Mensagem sobre o topico...",
+                "Autor do Topico",
+                "Curso do topico"
+        );
+    }
 }

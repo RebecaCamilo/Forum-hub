@@ -1,14 +1,14 @@
 package api.forum.hub.factory;
 
-import api.forum.hub.domain.Topico;
+import api.forum.hub.domain.dto.DetalhesTopicoResponse;
 
 import java.time.LocalDateTime;
 import java.time.Month;
 
-public class TopicoFactory {
+public class DetalhesTopicoResponseFactory {
 
-    public static Topico criaTopicoCompleto() {
-        return new Topico(
+    public static DetalhesTopicoResponse criaDetalhesTopicoResponseCompleto() {
+        return new DetalhesTopicoResponse(
                 1L,
                 "Titulo do post",
                 "Mensagem sobre o topico...",

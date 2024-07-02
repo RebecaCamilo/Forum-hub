@@ -9,10 +9,10 @@ public class CadastroTopicoRequestFactory {
 
     public static CadastroTopicoRequest criaCadastroTopicoRequestCompleto() {
         return new CadastroTopicoRequest(
-                "Título do post",
-                "Mensagem sobre o tópico...",
-                "Autor do Tópico",
-                "Curso do tópico"
+                "Titulo do post",
+                "Mensagem sobre o topico...",
+                "Autor do Topico",
+                "Curso do topico"
         );
     }
 }

@@ -1,4 +1,4 @@
-create table medicos(
+create table topicos (
     id bigserial not null primary key,
     titulo varchar(100) not null,
     mensagem varchar(500) not null,

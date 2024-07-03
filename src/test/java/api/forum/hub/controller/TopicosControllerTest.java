@@ -1,5 +1,6 @@
 package api.forum.hub.controller;
 
+import api.forum.hub.domain.Topico;
 import api.forum.hub.domain.dto.CadastroTopicoRequest;
 import api.forum.hub.domain.dto.DetalhesTopicoResponse;
 import api.forum.hub.service.TopicoService;
@@ -11,9 +12,16 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static api.forum.hub.factory.CadastroTopicoRequestFactory.criaCadastroTopicoRequestCompleto;
 import static api.forum.hub.factory.CadastroTopicoRequestFactory.criaCadastroTopicoRequestInvalido;
@@ -23,6 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -77,5 +86,46 @@ class TopicosControllerTest {
 
         // Then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+    }
+
+    @Test
+    @DisplayName("Deve retornar 200 quando listar e houver topico cadastrado")
+    void deveRestornar200QuandoListarEHouverTopicoCadastrado() throws Exception {
+        // Given
+        List<Topico> topicosCadastrados = Arrays.asList(criaTopicoCompleto());
+        Page<Topico> pageComTopico = new PageImpl<>(topicosCadastrados, Pageable.unpaged(), topicosCadastrados.size());
+
+        // When
+        when(service.listarTopicos(any())).thenReturn(pageComTopico);
+        var response = mvc.perform(get("/topicos"))
+                .andReturn()
+                .getResponse();
+
+        // Then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).contains("\"numberOfElements\":1");
+        System.out.println(response.getContentAsString());
+    }
+
+
+    @Test
+    @DisplayName("Deve retornar 200 quando listar e não houver topico cadastrado")
+    void deveRestornar200QuandoListarENaoHouverTopicoCadastrado() throws Exception {
+        // Given
+        List<Topico> emptyList = new ArrayList<>();
+        Pageable pageable = Pageable.unpaged();
+        Page<Topico> emptyPage = new PageImpl<>(emptyList, pageable, 0);
+
+        // When
+        when(service.listarTopicos(any())).thenReturn(emptyPage);
+
+        var response = mvc.perform(get("/topicos"))
+                .andReturn()
+                .getResponse();
+
+        // Then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).contains("\"numberOfElements\":0");
+        System.out.println(response.getContentAsString());
     }
 }

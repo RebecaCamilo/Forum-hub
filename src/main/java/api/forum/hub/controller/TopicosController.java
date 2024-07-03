@@ -1,6 +1,7 @@
 package api.forum.hub.controller;
 
 import api.forum.hub.domain.Topico;
+import api.forum.hub.domain.dto.AtualizacaoTopicoRequest;
 import api.forum.hub.domain.dto.CadastroTopicoRequest;
 import api.forum.hub.domain.dto.DetalhesTopicoResponse;
 import api.forum.hub.service.TopicoService;
@@ -36,5 +37,20 @@ public class TopicosController {
         var page = service.listarTopicos(paginacao).map(DetalhesTopicoResponse::new);
 
         return ResponseEntity.ok(page);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity detalhar(@PathVariable Long id) {
+        var topico = service.detalharTopico(id);
+
+        return ResponseEntity.ok(new DetalhesTopicoResponse(topico));
+    }
+
+    @PutMapping
+    @Transactional
+    public ResponseEntity atualizar(@RequestBody @Valid AtualizacaoTopicoRequest request) {
+        var topico = service.atualizarTopico(new Topico(request));
+
+        return ResponseEntity.ok(new DetalhesTopicoResponse(topico));
     }
 }

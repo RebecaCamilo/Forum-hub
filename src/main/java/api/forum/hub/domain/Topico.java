@@ -1,5 +1,6 @@
 package api.forum.hub.domain;
 
+import api.forum.hub.domain.dto.AtualizacaoTopicoRequest;
 import api.forum.hub.domain.dto.CadastroTopicoRequest;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -33,5 +34,22 @@ public class Topico {
         this.status = 1;
         this.autor = request.autor();
         this.curso = request.curso();
+    }
+
+    public Topico(AtualizacaoTopicoRequest request) {
+        this.id = request.id();
+        this.titulo = request.titulo();
+        this.mensagem = request.mensagem();
+        this.autor = request.autor();
+        this.curso = request.curso();
+    }
+
+    public Topico atualizarTopico(Topico topico) {
+        this.titulo = topico.getTitulo();
+        this.mensagem = topico.getMensagem();
+        this.autor = topico.getAutor();
+        this.curso = topico.getCurso();
+
+        return topico;
     }
 }

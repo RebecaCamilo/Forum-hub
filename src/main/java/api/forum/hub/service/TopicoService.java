@@ -22,4 +22,15 @@ public class TopicoService {
     public Page<Topico> listarTopicos(Pageable pageable) {
         return repository.findAllByStatus(ATIVO, pageable);
     }
+
+    public Topico detalharTopico(Long id) {
+        return repository.getReferenceById(id);
+    }
+
+    public Topico atualizarTopico(Topico topicoAtt) {
+        var topico = repository.findById(topicoAtt.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Topico com o ID fornecido não foi encontrado"));
+        topico.atualizarTopico(topicoAtt);
+        return topico;
+    }
 }

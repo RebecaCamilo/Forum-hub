@@ -52,4 +52,8 @@ public class Topico {
 
         return topico;
     }
+
+    public void excluir() {
+        this.status = (short) 0;
+    }
 }

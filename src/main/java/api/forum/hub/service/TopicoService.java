@@ -33,4 +33,10 @@ public class TopicoService {
         topico.atualizarTopico(topicoAtt);
         return topico;
     }
+
+    public void excluirTopico(Long id) {
+        var topico = repository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Topico com o ID fornecido não foi encontrado"));
+        topico.excluir();
+    }
 }

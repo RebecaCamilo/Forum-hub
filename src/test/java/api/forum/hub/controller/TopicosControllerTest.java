@@ -1,6 +1,7 @@
 package api.forum.hub.controller;
 
 import api.forum.hub.domain.Topico;
+import api.forum.hub.domain.dto.AtualizacaoTopicoRequest;
 import api.forum.hub.domain.dto.CadastroTopicoRequest;
 import api.forum.hub.domain.dto.DetalhesTopicoResponse;
 import api.forum.hub.service.TopicoService;
@@ -24,6 +25,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static api.forum.hub.factory.AtualizacaoTopicoRequestFactory.criaAtualizacaoTopicoRequestCompleto;
+import static api.forum.hub.factory.AtualizacaoTopicoRequestFactory.criaAtualizacaoTopicoRequestInvalido;
 import static api.forum.hub.factory.CadastroTopicoRequestFactory.criaCadastroTopicoRequestCompleto;
 import static api.forum.hub.factory.CadastroTopicoRequestFactory.criaCadastroTopicoRequestInvalido;
 import static api.forum.hub.factory.DetalhesTopicoResponseFactory.criaDetalhesTopicoResponseCompleto;
@@ -31,8 +34,7 @@ import static api.forum.hub.factory.TopicoFactory.criaTopicoCompleto;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -48,6 +50,8 @@ class TopicosControllerTest {
     private JacksonTester<CadastroTopicoRequest> cadastroTopicoRequestJson;
     @Autowired
     private JacksonTester<DetalhesTopicoResponse> detalhesTopicoResponseJson;
+    @Autowired
+    private JacksonTester<AtualizacaoTopicoRequest> atualizacaoTopicoRequestJson;
     @MockBean
     private TopicoService service;
 
@@ -101,6 +105,7 @@ class TopicosControllerTest {
 
         // When
         when(service.listarTopicos(any())).thenReturn(pageComTopico);
+
         var response = mvc.perform(get("/topicos"))
                 .andReturn()
                 .getResponse();
@@ -159,11 +164,95 @@ class TopicosControllerTest {
     void deveRetornar404QuandoNaoExistirTopicoComIdEspecificado() throws Exception {
         // When
         when(service.detalharTopico(ID)).thenThrow(createObjectNotFoundException(ID));
+
         mvc.perform(get("/topicos/" + ID))
                 .andExpect(status().isNotFound());
 
         // Then
         verify(service, times(1)).detalharTopico(ID);
+    }
+
+    @Test
+    @DisplayName("Deve retornar 200 quando atualizar topico com sucesso")
+    void deveRetornar200QuandoAtualizarTopicoComSucesso() throws Exception {
+        // When
+        when(service.atualizarTopico(any())).thenReturn(criaTopicoCompleto());
+
+        var response = mvc
+                .perform(
+                        put("/topicos")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(atualizacaoTopicoRequestJson.write(criaAtualizacaoTopicoRequestCompleto())
+                                        .getJson())
+                )
+                .andReturn().getResponse();
+
+        var jsonEsperado = detalhesTopicoResponseJson.write(
+                criaDetalhesTopicoResponseCompleto()
+        ).getJson();
+
+        // Then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo(jsonEsperado);
+    }
+
+    @Test
+    @DisplayName("Deve retornar 400 quando tenta atualizar topico invalido")
+    void deveRetornar400QuandoTentaAtualizarTopicoInvalido() throws Exception {
+        // When
+        var response = mvc
+                .perform(
+                        put("/topicos")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(atualizacaoTopicoRequestJson.write(criaAtualizacaoTopicoRequestInvalido())
+                                        .getJson())
+                )
+                .andReturn().getResponse();
+
+        // Then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+    }
+
+    @Test
+    @DisplayName("Deve retornar 404 ao tentar atualizar quando nao existir topico com id especificado")
+    void deveRetornar404AoTentarAtualizarQuandoNaoExistirTopicoComIdEspecificado() throws Exception {
+        // When
+        when(service.atualizarTopico(any())).thenThrow(createObjectNotFoundException(ID));
+
+        mvc.perform(put("/topicos")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(atualizacaoTopicoRequestJson.write(criaAtualizacaoTopicoRequestCompleto())
+                        .getJson()))
+                .andExpect(status().isNotFound());
+
+        // Then
+        verify(service, times(1)).atualizarTopico(any());
+    }
+
+    @Test
+    @DisplayName("Deve retornar 204 quando nao excluir topico com sucesso")
+    void deveRetornar204QuandoNaoExcluirTopicoComSucesso() throws Exception {
+        // When
+        doNothing().when(service).excluirTopico(ID);
+
+        mvc.perform(delete("/topicos/{id}", ID))
+                .andExpect(status().isNoContent());
+
+        // Then
+        verify(service, times(1)).excluirTopico(ID);
+    }
+
+    @Test
+    @DisplayName("Deve retornar 404 ao tentar excluir quando nao existir topico com id especificado")
+    void deveRetornar404AoTentarExcluirQuandoNaoExistirTopicoComIdEspecificado() throws Exception {
+        // When
+        doThrow(createObjectNotFoundException(ID)).when(service).excluirTopico(ID);
+
+        mvc.perform(delete("/topicos/{id}", ID))
+                .andExpect(status().isNotFound());
+
+        // Then
+        verify(service, times(1)).excluirTopico(ID);
     }
 
     private static ObjectNotFoundException createObjectNotFoundException(Long id) {

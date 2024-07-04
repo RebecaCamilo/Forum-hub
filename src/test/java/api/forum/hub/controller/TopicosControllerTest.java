@@ -4,6 +4,7 @@ import api.forum.hub.domain.Topico;
 import api.forum.hub.domain.dto.CadastroTopicoRequest;
 import api.forum.hub.domain.dto.DetalhesTopicoResponse;
 import api.forum.hub.service.TopicoService;
+import org.hibernate.ObjectNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,14 +30,17 @@ import static api.forum.hub.factory.DetalhesTopicoResponseFactory.criaDetalhesTo
 import static api.forum.hub.factory.TopicoFactory.criaTopicoCompleto;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @AutoConfigureJsonTesters
 class TopicosControllerTest {
+
+    private final Long ID = 1L;
 
     @Autowired
     private MockMvc mvc;
@@ -49,7 +53,7 @@ class TopicosControllerTest {
 
     @Test
     @DisplayName("Deve retornar 201 quando cadastra topico com sucesso")
-    void deveRestornar201QuandoCadastraTopicoComSucesso() throws Exception {
+    void deveRetornar201QuandoCadastraTopicoComSucesso() throws Exception {
         // When
         when(service.cadastrarTopico(any())).thenReturn(criaTopicoCompleto());
 
@@ -73,7 +77,7 @@ class TopicosControllerTest {
 
     @Test
     @DisplayName("Deve retornar 400 quando cadastra topico invalido")
-    void deveRestornar400QuandoCadastraTopicoInvalido() throws Exception {
+    void deveRetornar400QuandoCadastraTopicoInvalido() throws Exception {
         // When
         var response = mvc
                 .perform(
@@ -90,7 +94,7 @@ class TopicosControllerTest {
 
     @Test
     @DisplayName("Deve retornar 200 quando listar e houver topico cadastrado")
-    void deveRestornar200QuandoListarEHouverTopicoCadastrado() throws Exception {
+    void deveRetornar200QuandoListarEHouverTopicoCadastrado() throws Exception {
         // Given
         List<Topico> topicosCadastrados = Arrays.asList(criaTopicoCompleto());
         Page<Topico> pageComTopico = new PageImpl<>(topicosCadastrados, Pageable.unpaged(), topicosCadastrados.size());
@@ -107,10 +111,9 @@ class TopicosControllerTest {
         System.out.println(response.getContentAsString());
     }
 
-
     @Test
     @DisplayName("Deve retornar 200 quando listar e não houver topico cadastrado")
-    void deveRestornar200QuandoListarENaoHouverTopicoCadastrado() throws Exception {
+    void deveRetornar200QuandoListarENaoHouverTopicoCadastrado() throws Exception {
         // Given
         List<Topico> emptyList = new ArrayList<>();
         Pageable pageable = Pageable.unpaged();
@@ -127,5 +130,43 @@ class TopicosControllerTest {
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
         assertThat(response.getContentAsString()).contains("\"numberOfElements\":0");
         System.out.println(response.getContentAsString());
+    }
+
+    @Test
+    @DisplayName("Deve retornar 200 quando existir topico com id especificado")
+    void deveRetornar200QuandoExistirTopicoComIdEspecificado() throws Exception {
+        // Given
+        var topico = criaTopicoCompleto();
+
+        // When
+        when(service.detalharTopico(any())).thenReturn(topico);
+
+        var response = mvc
+                .perform(get("/topicos/{id}", topico.getId()))
+                .andReturn().getResponse();
+
+        var jsonEsperado = detalhesTopicoResponseJson.write(
+                criaDetalhesTopicoResponseCompleto()
+        ).getJson();
+
+        // Then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo(jsonEsperado);
+    }
+
+    @Test
+    @DisplayName("Deve retornar 404 quando nao existir topico com id especificado")
+    void deveRetornar404QuandoNaoExistirTopicoComIdEspecificado() throws Exception {
+        // When
+        when(service.detalharTopico(ID)).thenThrow(createObjectNotFoundException(ID));
+        mvc.perform(get("/topicos/" + ID))
+                .andExpect(status().isNotFound());
+
+        // Then
+        verify(service, times(1)).detalharTopico(ID);
+    }
+
+    private static ObjectNotFoundException createObjectNotFoundException(Long id) {
+        return new ObjectNotFoundException(id, "Topico com o ID fornecido não foi encontrado");
     }
 }

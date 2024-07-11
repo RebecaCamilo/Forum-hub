@@ -1,4 +1,4 @@
-package api.forum.hub.config;
+package api.forum.hub.config.exception;
 
 import org.hibernate.ObjectNotFoundException;
 import org.springframework.http.HttpStatus;

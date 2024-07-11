@@ -1,6 +1,7 @@
 package api.forum.hub.controller;
 
 import api.forum.hub.domain.dto.AutenticacaoRequest;
+import api.forum.hub.config.security.TokenService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,13 +20,18 @@ public class AutenticacaoController {
     @Autowired
     private AuthenticationManager manager;
 
+    @Autowired
+    private TokenService tokenService;
+
     @PostMapping
     @Transactional
     public ResponseEntity efetuarLogin(@RequestBody @Valid AutenticacaoRequest dados) {
-        var token = new UsernamePasswordAuthenticationToken(dados.login(), dados.senha());
-        var authentication = manager.authenticate(token);
+        var authenticationTtoken = new UsernamePasswordAuthenticationToken(dados.login(), dados.senha());
+        var authentication = manager.authenticate(authenticationTtoken);
 
-        return ResponseEntity.ok().build();
+        var tokenJWT = tokenService.gerarToken((Usuario) authentication.getPrincipal());
+
+        return ResponseEntity.ok().build(new TokenJWTResponse(tokenJWT));
     }
 
 }

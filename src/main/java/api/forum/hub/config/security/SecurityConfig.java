@@ -1,4 +1,4 @@
-package api.forum.hub.config;
+package api.forum.hub.config.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

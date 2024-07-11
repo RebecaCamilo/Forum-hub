@@ -56,6 +56,7 @@ class TopicosControllerTest {
     private TopicoService service;
 
     @Test
+    @WithMockUser
     @DisplayName("Deve retornar 201 quando cadastra topico com sucesso")
     void deveRetornar201QuandoCadastraTopicoComSucesso() throws Exception {
         // When
@@ -80,6 +81,7 @@ class TopicosControllerTest {
     }
 
     @Test
+    @WithMockUser
     @DisplayName("Deve retornar 400 quando cadastra topico invalido")
     void deveRetornar400QuandoCadastraTopicoInvalido() throws Exception {
         // When
@@ -97,6 +99,7 @@ class TopicosControllerTest {
     }
 
     @Test
+    @WithMockUser
     @DisplayName("Deve retornar 200 quando listar e houver topico cadastrado")
     void deveRetornar200QuandoListarEHouverTopicoCadastrado() throws Exception {
         // Given
@@ -117,6 +120,7 @@ class TopicosControllerTest {
     }
 
     @Test
+    @WithMockUser
     @DisplayName("Deve retornar 200 quando listar e não houver topico cadastrado")
     void deveRetornar200QuandoListarENaoHouverTopicoCadastrado() throws Exception {
         // Given
@@ -138,6 +142,7 @@ class TopicosControllerTest {
     }
 
     @Test
+    @WithMockUser
     @DisplayName("Deve retornar 200 quando existir topico com id especificado")
     void deveRetornar200QuandoExistirTopicoComIdEspecificado() throws Exception {
         // Given
@@ -160,6 +165,7 @@ class TopicosControllerTest {
     }
 
     @Test
+    @WithMockUser
     @DisplayName("Deve retornar 404 quando nao existir topico com id especificado")
     void deveRetornar404QuandoNaoExistirTopicoComIdEspecificado() throws Exception {
         // When
@@ -173,6 +179,7 @@ class TopicosControllerTest {
     }
 
     @Test
+    @WithMockUser
     @DisplayName("Deve retornar 200 quando atualizar topico com sucesso")
     void deveRetornar200QuandoAtualizarTopicoComSucesso() throws Exception {
         // When
@@ -197,6 +204,7 @@ class TopicosControllerTest {
     }
 
     @Test
+    @WithMockUser
     @DisplayName("Deve retornar 400 quando tenta atualizar topico invalido")
     void deveRetornar400QuandoTentaAtualizarTopicoInvalido() throws Exception {
         // When
@@ -214,6 +222,7 @@ class TopicosControllerTest {
     }
 
     @Test
+    @WithMockUser
     @DisplayName("Deve retornar 404 ao tentar atualizar quando nao existir topico com id especificado")
     void deveRetornar404AoTentarAtualizarQuandoNaoExistirTopicoComIdEspecificado() throws Exception {
         // When
@@ -230,6 +239,7 @@ class TopicosControllerTest {
     }
 
     @Test
+    @WithMockUser
     @DisplayName("Deve retornar 204 quando nao excluir topico com sucesso")
     void deveRetornar204QuandoNaoExcluirTopicoComSucesso() throws Exception {
         // When
@@ -243,6 +253,7 @@ class TopicosControllerTest {
     }
 
     @Test
+    @WithMockUser
     @DisplayName("Deve retornar 404 ao tentar excluir quando nao existir topico com id especificado")
     void deveRetornar404AoTentarExcluirQuandoNaoExistirTopicoComIdEspecificado() throws Exception {
         // When
